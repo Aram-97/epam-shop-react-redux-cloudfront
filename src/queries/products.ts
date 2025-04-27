@@ -5,15 +5,10 @@ import { useQuery, useQueryClient, useMutation } from "react-query";
 import React from "react";
 
 export function useAvailableProducts() {
-  return useQuery<AvailableProduct[], AxiosError>(
-    "available-products",
-    async () => {
-      const res = await axios.get<AvailableProduct[]>(
-        `${API_PATHS.bff}/product/available`
-      );
-      return res.data;
-    }
-  );
+  return useQuery<AvailableProduct[], AxiosError>("available-products", async () => {
+    const res = await axios.get<AvailableProduct[]>(`${API_PATHS.bff}/product/available`);
+    return res.data;
+  });
 }
 
 export function useInvalidateAvailableProducts() {
@@ -24,13 +19,18 @@ export function useInvalidateAvailableProducts() {
   );
 }
 
+export function useProductsList() {
+  return useQuery<AvailableProduct[], AxiosError>("product", async () => {
+    const res = await axios.get<AvailableProduct[]>(`${API_PATHS.bff}/products`);
+    return res.data;
+  });
+}
+
 export function useAvailableProduct(id?: string) {
   return useQuery<AvailableProduct, AxiosError>(
     ["product", { id }],
     async () => {
-      const res = await axios.get<AvailableProduct>(
-        `${API_PATHS.bff}/product/${id}`
-      );
+      const res = await axios.get<AvailableProduct>(`${API_PATHS.bff}/products/${id}`);
       return res.data;
     },
     { enabled: !!id }
@@ -40,8 +40,7 @@ export function useAvailableProduct(id?: string) {
 export function useRemoveProductCache() {
   const queryClient = useQueryClient();
   return React.useCallback(
-    (id?: string) =>
-      queryClient.removeQueries(["product", { id }], { exact: true }),
+    (id?: string) => queryClient.removeQueries(["product", { id }], { exact: true }),
     []
   );
 }
