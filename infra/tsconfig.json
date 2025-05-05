@@ -17,7 +17,11 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "mock-data/*": ["lib/product-service/layers/nodejs/node20/node_modules/mock-data/*"]
+    }
   },
   "exclude": ["node_modules", "cdk.out"]
 }

@@ -11,7 +11,7 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint --ignore-path .gitignore --fix src",
     "prettier": "prettier src --write",
-    "cdk:deploy": "npm run build && cd infra && cdk synth > WebAppStack.template.json && cdk deploy",
+    "cdk:deploy": "npm run build && cd infra && npm run build && cdk synth --quiet $npm_config_stack && cdk deploy $npm_config_stack",
     "client:deploy": "sls client deploy --no-config-change --no-policy-change --no-cors-change",
     "client:deploy:nc": "npm run client:deploy -- --no-confirm",
     "client:build:deploy": "npm run build && npm run client:deploy",
