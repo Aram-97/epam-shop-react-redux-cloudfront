@@ -7,6 +7,7 @@
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
+    "skipLibCheck": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
     "noUnusedLocals": false,
@@ -18,10 +19,7 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "typeRoots": ["./node_modules/@types"],
-    "baseUrl": ".",
-    "paths": {
-      "mock-data/*": ["lib/product-service/layers/nodejs/node20/node_modules/mock-data/*"]
-    }
+    "baseUrl": "."
   },
-  "exclude": ["node_modules", "cdk.out"]
+  "exclude": ["cdk.out", "node_modules"]
 }
