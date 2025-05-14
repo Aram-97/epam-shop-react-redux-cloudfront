@@ -1,10 +1,14 @@
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
 import * as path from "path";
 
 import { CLOUDFRONT_URL } from "../../constants";
+
+export const PRODUCTS_TABLE_NAME = "Products";
+export const STOCK_TABLE_NAME = "Stock";
 
 export class ProductServiceStack extends cdk.Stack {
   private integrationResHeaders = {
@@ -36,17 +40,17 @@ export class ProductServiceStack extends cdk.Stack {
         type: apigateway.JsonSchemaType.NUMBER,
       },
     },
-    required: ["title", "description", "price", "count"],
+    required: ["id", "title", "price"],
     additionalProperties: false,
   };
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const mockDataLayer = new lambda.LayerVersion(this, "MockDataLayer", {
+    const nodeModulesLayer = new lambda.LayerVersion(this, "NodeModulesLayer", {
       code: lambda.Code.fromAsset(path.join(__dirname, "./layers")),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-      description: "/opt/nodejs/node20/node_modules/mock-data",
+      description: "/opt/nodejs/node20/node_modules",
     });
 
     const getProductsListLambda = new lambda.Function(this, "getProductsList", {
@@ -55,7 +59,11 @@ export class ProductServiceStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(5),
       handler: "handler.main",
       code: lambda.Code.fromAsset(path.join(__dirname, "./handlers/getProductsList")),
-      layers: [mockDataLayer],
+      layers: [nodeModulesLayer],
+      environment: {
+        PRODUCTS_TABLE_NAME,
+        STOCK_TABLE_NAME,
+      },
     });
 
     const getProductByIdLambda = new lambda.Function(this, "getProductById", {
@@ -64,7 +72,24 @@ export class ProductServiceStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(5),
       handler: "handler.main",
       code: lambda.Code.fromAsset(path.join(__dirname, "./handlers/getProductsById")),
-      layers: [mockDataLayer],
+      layers: [nodeModulesLayer],
+      environment: {
+        PRODUCTS_TABLE_NAME,
+        STOCK_TABLE_NAME,
+      },
+    });
+
+    const createProductLambda = new lambda.Function(this, "createProduct", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(5),
+      handler: "handler.main",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./handlers/createProduct")),
+      layers: [nodeModulesLayer],
+      environment: {
+        PRODUCTS_TABLE_NAME,
+        STOCK_TABLE_NAME,
+      },
     });
 
     const api = new apigateway.RestApi(this, "product-api", {
@@ -92,6 +117,16 @@ export class ProductServiceStack extends cdk.Stack {
       },
     });
 
+    const createProductRequestModel = new apigateway.Model(this, "CreateProductRequestModel", {
+      restApi: api,
+      contentType: "application/json",
+      modelName: "CreateProductRequest",
+      schema: {
+        ...this.productSchema,
+        required: ["title", "price"],
+      },
+    });
+
     const getProductsListLambdaInt = new apigateway.LambdaIntegration(getProductsListLambda, {
       proxy: false,
       integrationResponses: [
@@ -106,6 +141,10 @@ export class ProductServiceStack extends cdk.Stack {
     });
 
     const getProductByIdLambdaInt = new apigateway.LambdaIntegration(getProductByIdLambda, {
+      proxy: true,
+    });
+
+    const createProductLambdaInt = new apigateway.LambdaIntegration(createProductLambda, {
       proxy: true,
     });
 
@@ -132,10 +171,22 @@ export class ProductServiceStack extends cdk.Stack {
       ],
     });
 
+    productsResource.addMethod("POST", createProductLambdaInt, {
+      requestModels: {
+        "application/json": createProductRequestModel,
+      },
+      methodResponses: [
+        {
+          statusCode: "200",
+          responseParameters: this.methodResHeaders,
+        },
+      ],
+    });
+
     productsResource.addCorsPreflight({
       allowHeaders: ["Content-Type"],
       allowOrigins: [CLOUDFRONT_URL],
-      allowMethods: ["GET"],
+      allowMethods: ["GET", "POST"],
     });
 
     productIdResource.addCorsPreflight({
@@ -143,5 +194,28 @@ export class ProductServiceStack extends cdk.Stack {
       allowOrigins: [CLOUDFRONT_URL],
       allowMethods: ["GET"],
     });
+
+    const productsTable = new dynamodb.TableV2(this, PRODUCTS_TABLE_NAME, {
+      tableName: PRODUCTS_TABLE_NAME,
+      partitionKey: {
+        name: "id",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    const stockTable = new dynamodb.TableV2(this, STOCK_TABLE_NAME, {
+      tableName: STOCK_TABLE_NAME,
+      partitionKey: {
+        name: "product_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    productsTable.grantReadData(getProductsListLambda);
+    productsTable.grantReadData(getProductByIdLambda);
+    productsTable.grantWriteData(createProductLambda);
+    stockTable.grantReadData(getProductsListLambda);
+    stockTable.grantReadData(getProductByIdLambda);
+    stockTable.grantWriteData(createProductLambda);
   }
 }

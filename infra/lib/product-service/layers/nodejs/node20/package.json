@@ -1,0 +1,15 @@
+{
+  "name": "product-service-lambda-layer",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.806.0",
+    "@types/uuid": "^10.0.0",
+    "uuid": "^11.1.0"
+  }
+}
