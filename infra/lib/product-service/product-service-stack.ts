@@ -1,11 +1,15 @@
+import { Construct } from "constructs";
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import { Construct } from "constructs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as sns from "aws-cdk-lib/aws-sns";
 import * as path from "path";
 
 import { CLOUDFRONT_URL } from "../../constants";
+import { EmailSubscription, SmsSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 export const PRODUCTS_TABLE_NAME = "Products";
 export const STOCK_TABLE_NAME = "Stock";
@@ -217,5 +221,58 @@ export class ProductServiceStack extends cdk.Stack {
     stockTable.grantReadData(getProductsListLambda);
     stockTable.grantReadData(getProductByIdLambda);
     stockTable.grantWriteData(createProductLambda);
+
+    const createProductTopic = new sns.Topic(this, "createProductTopic", {
+      displayName: "Create Product Topic",
+      topicName: "CreateProductTopic",
+    });
+    createProductTopic.addSubscription(
+      new EmailSubscription("vuhoanglinh1997@gmail.com", {
+        filterPolicy: {
+          category: sns.SubscriptionFilter.stringFilter({ allowlist: ["premium"] }),
+        },
+      })
+    );
+    createProductTopic.addSubscription(
+      new EmailSubscription("linh_vu@epam.com", {
+        filterPolicy: {
+          category: sns.SubscriptionFilter.stringFilter({ allowlist: ["discount"] }),
+        },
+      })
+    );
+
+    const catalogItemsQueue = new sqs.Queue(this, "catalogItemsQueue");
+    new cdk.CfnOutput(this, "ProductServiceStackOutput", {
+      value: catalogItemsQueue.queueArn,
+      exportName: "CatalogItemsQueueARN",
+      description: "The ARN of the Catalog Items Queue",
+    });
+
+    const catalogBatchProcessLambda = new lambda.Function(this, "catalogBatchProcess", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(5),
+      handler: "handler.main",
+      code: lambda.Code.fromAsset(path.join(__dirname, "./handlers/catalogBatchProcess")),
+      layers: [nodeModulesLayer],
+      environment: {
+        SNS_TOPIC_ARN: createProductTopic.topicArn,
+        PRODUCTS_TABLE_NAME,
+        STOCK_TABLE_NAME,
+      },
+    });
+
+    catalogBatchProcessLambda.addEventSource(
+      new SqsEventSource(catalogItemsQueue, { batchSize: 5 })
+    );
+
+    createProductTopic.grantPublish(catalogBatchProcessLambda);
+    productsTable.grantWriteData(catalogBatchProcessLambda);
+    stockTable.grantWriteData(catalogBatchProcessLambda);
+
+    catalogBatchProcessLambda.addPermission("SQSTriggerPermission", {
+      principal: new cdk.aws_iam.ServicePrincipal("sqs.amazonaws.com"),
+      sourceArn: catalogItemsQueue.queueArn,
+    });
   }
 }
