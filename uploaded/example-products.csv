@@ -1,6 +1,25 @@
 id,title,description,price
 1b2c3d4e-5f6g-7h8i-9j0k-lmnopqrstuvw,Men's T-Shirt,A comfortable cotton t-shirt for everyday wear,20
 2c3d4e5f-6g7h-8i9j-0k1l-mnopqrstuvwxy,Wireless Headphones,Noise-cancelling over-ear headphones with Bluetooth connectivity,150
-3d4e5f6g-7h8i-9j0k-1l2m-nopqrstuvwxyz,Organic Apples,Fresh organic apples, 1 lb pack,5
+3d4e5f6g-7h8i-9j0k-1l2m-nopqrstuvwxyz,Organic Apples,Fresh organic apples,267
 4e5f6g7h-8i9j-0k1l-2m3n-opqrstuvwxyz1,Running Shoes,Lightweight running shoes with breathable material,75
 5f6g7h8i-9j0k-1l2m-3n4o-pqrstuvwxyz12,Gaming Mouse,Ergonomic gaming mouse with customizable RGB lighting,45
+6a7b8c9d-1e2f-3g4h-5i6j-klmnopqrstuv,Leather Wallet,Premium leather wallet with multiple compartments,40
+7b8c9d1e-2f3g-4h5i-6j7k-lmnopqrstuvw,Instant Coffee,Rich and aromatic instant coffee,200
+8c9d1e2f-3g4h-5i6j-7k8l-mnopqrstuvwx,Yoga Mat,Non-slip yoga mat with extra cushioning for comfort,30
+9d1e2f3g-4h5i-6j7k-8l9m-nopqrstuvwxy,Bluetooth Speaker,Portable Bluetooth speaker with 10-hour battery life,60
+0e2f3g4h-5i6j-7k8l-9m0n-opqrstuvwxyz,Electric Kettle,1.7L stainless steel electric kettle with auto shut-off,35
+1f3g4h5i-6j7k-8l9m-0n1o-pqrstuvwxyz1,Camping Tent,Waterproof 4-person camping tent with easy setup,120
+2g4h5i6j-7k8l-9m0n-1o2p-qrstuvwxyz12,Smartphone,Latest 5G smartphone with a high-resolution camera,999
+3h5i6j7k-8l9m-0n1o-2p3q-rstuvwxyz123,Gaming Chair,Ergonomic gaming chair with lumbar support,250
+4i6j7k8l-9m0n-1o2p-3q4r-stuvwxyz1234,Desk Lamp,Adjustable LED desk lamp with touch controls,25
+5j7k8l9m-0n1o-2p3q-4r5s-tuvwxyz12345,Monitor,27-inch 4K monitor with HDR support,300
+6k8l9m0n-1o2p-3q4r-5s6t-uvwxyz123456,Blender,High-speed blender with multiple settings,80
+7l9m0n1o-2p3q-4r5s-6t7u-vwxyz1234567,Backpack,Durable backpack with multiple compartments,50
+8m0n1o2p-3q4r-5s6t-7u8v-wxyz12345678,Water Bottle,Insulated stainless steel water bottle,20
+9n1o2p3q-4r5s-6t7u-8v9w-xyz123456789,Electric Scooter,Lightweight electric scooter with a 15-mile range,400
+0o2p3q4r-5s6t-7u8v-9w0x-yz1234567890,Coffee Maker,Drip coffee maker with programmable settings,70
+1p3q4r5s-6t7u-8v9w-0x1y-z12345678901,Wireless Keyboard,Slim wireless keyboard with long battery life,45
+2q4r5s6t-7u8v-9w0x-1y2z-123456789012,Smartwatch,Fitness smartwatch with heart rate monitoring,150
+3r5s6t7u-8v9w-0x1y-2z3a-234567890123,Tablet,10-inch tablet with high-resolution display,200
+4s6t7u8v-9w0x-1y2z-3a4b-345678901234,Mountain Bike,Durable mountain bike with 21-speed gears,500
