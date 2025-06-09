@@ -43,6 +43,11 @@ export class ImportServiceStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, "import-api", {
       restApiName: "Import API",
       description: "This API serves Lambda functions for Import Service",
+      defaultCorsPreflightOptions: {
+        allowHeaders: ["*", "Authorization"],
+        allowOrigins: [CLOUDFRONT_URL],
+        allowMethods: ["GET", "OPTIONS"],
+      },
     });
 
     const importResource = api.root.addResource("import");
@@ -67,16 +72,31 @@ export class ImportServiceStack extends cdk.Stack {
       }
     );
 
+    const tokenAuthorizerLambdaARN = cdk.Fn.importValue("TokenAuthorizerLambdaARN");
+    const tokenAuthorizerLambda = lambda.Function.fromFunctionAttributes(
+      this,
+      "tokenAuthorizerLambda",
+      {
+        functionArn: tokenAuthorizerLambdaARN,
+        sameEnvironment: true,
+      }
+    );
+
+    tokenAuthorizerLambda.addPermission("APIGatewayTriggerPermission", {
+      principal: new cdk.aws_iam.ServicePrincipal("apigateway.amazonaws.com"),
+      sourceArn: api.arnForExecuteApi(),
+    });
+
+    const authorizer = new apigateway.TokenAuthorizer(this, "token-authorizer", {
+      handler: tokenAuthorizerLambda,
+      resultsCacheTtl: cdk.Duration.seconds(0),
+    });
+
     importResource.addMethod("GET", importProductsFileLambdaInt, {
+      authorizer,
       requestModels: {
         "application/json": importProductsFileRequestModel,
       },
-    });
-
-    importResource.addCorsPreflight({
-      allowHeaders: ["Content-Type"],
-      allowOrigins: [CLOUDFRONT_URL],
-      allowMethods: ["GET"],
     });
 
     const bucket = new s3.Bucket(this, "ImportBucket", {

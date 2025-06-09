@@ -7,6 +7,7 @@ import { ProductServiceStack } from "../lib/product-service/product-service-stac
 import { TodoStack } from "../lib/todo/TodoStack";
 import { HelloS3Stack } from "../lib/hello-s3/hello-s3-stack";
 import { ImportServiceStack } from "../lib/import-service/import-service-stack";
+import { AuthorizationServiceStack } from "../lib/authorization-service/authorization-service-stack";
 
 const app = new cdk.App();
 new DeployWebAppStack(app, "DeployWebAppStack", {
@@ -26,3 +27,4 @@ new ProductServiceStack(app, "ProductServiceStack", {});
 new TodoStack(app, "TodoStack", {});
 new HelloS3Stack(app, "HelloS3Stack", {});
 new ImportServiceStack(app, "ImportServiceStack", {});
+new AuthorizationServiceStack(app, "AuthorizationServiceStack", {});
